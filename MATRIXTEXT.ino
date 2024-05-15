@@ -134,7 +134,7 @@ const uint8_t PROGMEM _5bite_rus[] = {
   5, 0, 69, 124, 65, 0,        // 123 - { ї
   1, 127,                      // 124 - |
   5, 62, 73, 73, 65, 34,       // 125 - } Є
-  5, 0, 60, 74, 66, 32,        // 126 - ~ є
+  5, 0, 56, 84, 84, 68,        // 126 - ~ є
   0,                           // 127 - 0
   4, 252, 36, 36, 24,          // 128 - р
   4, 56, 68, 68, 40,           // 129 - с
@@ -368,6 +368,8 @@ bool ICACHE_RAM_ATTR httpUpdate() {
         news.replace("Є", "}");
         news.replace("ї", "{");
         news.replace("є", "~");
+        news.replace("—", "-");
+        news.replace("`", "'");
 
         news.toCharArray(Buf, 1000);
         Serial.printf(Buf);
