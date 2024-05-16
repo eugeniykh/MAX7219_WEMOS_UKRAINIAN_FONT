@@ -284,7 +284,7 @@ const char* password = "eugene01";  // put your password
 const char* ssid2 = "Galaxy A35";  // put your router name
 const char* password2 = "11111111";  // put your password
 
-char Buf[10000]; char Result[15000];
+char Buf[2000]; char Result[10000];
 int i = 0;
 
 StaticJsonDocument<10000> parsed;
@@ -293,7 +293,7 @@ Ticker queries, queriesUpdate;
 
 
 bool ICACHE_RAM_ATTR getRandomSeed() {
-bool result = false;
+  bool result = false;
   if ((WiFi.status() == WL_CONNECTED)) {
 
     WiFiClientSecure client;
@@ -357,37 +357,48 @@ bool ICACHE_RAM_ATTR httpUpdate() {
       Serial.println();
       // file found at server
       if (httpCode == HTTP_CODE_OK) {
-        http.getString().toCharArray(Result, 15000);
+        http.getString().toCharArray(Result, 10000);
         DeserializationError error = deserializeJson(parsed, Result);
-        String news = String(parsed["articles"][0]["title"]) + " " + String(parsed["articles"][0]["description"]);
+
+        String dateTime = String(parsed["articles"][0]["publishedAt"]);
+
+        String date = dateTime.substring(5, 10);
+
+        String time = dateTime.substring(11, 16);
+
+        String news = String(parsed["articles"][0]["title"]) + " "  + time +  " " + date + " " + String(parsed["articles"][0]["description"]);
+
         news.replace("І", "I");
         news.replace("і", "i");
         news.replace("Ї", "I");
         
+        news.replace("}", ")");
+        news.replace("{", "(");
+        news.replace("~", "-");
+
         news.replace("Є", "}");
         news.replace("ї", "{");
         news.replace("є", "~");
+
         news.replace("—", "-");
         news.replace("–", "-");
         news.replace("`", "'");
         news.replace("«", "\"");
         news.replace("»", "\"");
 
-        news.toCharArray(Buf, 10000);
+        news.toCharArray(Buf, 2000);
         Serial.printf(Buf);
         Serial.println();
         result = true;
       } else {
-        String(httpCode).toCharArray(Buf, 10000);
+        String(httpCode).toCharArray(Buf, 2000);
         Serial.printf(Buf);
         Serial.println();
       }
     } else {
       Serial.printf("[HTTPS] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
       
-      String(http.errorToString(httpCode).c_str()).toCharArray(Buf, 10000);
-      Serial.printf(Buf);
-      Serial.println();
+      String(http.errorToString(httpCode).c_str()).toCharArray(Buf, 2000);
     }
 
     http.end();
@@ -401,7 +412,7 @@ void ICACHE_RAM_ATTR onQuery() {
   if (httpUpdate()) {
     myDisplay.displayText("Апдейт", PA_CENTER, 100, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
     myDisplay.displayClear();
-  } 
+  }
   queriesUpdate.once(5.0, printUpdate);
 }
 
@@ -425,7 +436,7 @@ void setup() {
     delay(500);
     Serial.print(".");
     i++;
-    if (i == 15) {
+    if (i == 25) {
 
       Serial.println();
       Serial.println();
@@ -445,11 +456,15 @@ void setup() {
 
   httpUpdate();
   printUpdate();
-  queries.attach(60, onQuery); 
 }
 
 void loop() {
   if (myDisplay.displayAnimate()) {
     myDisplay.displayReset();
+  }
+  i++;
+  if (i > 3000000) {
+    onQuery();
+    i = 0;
   }
 }
