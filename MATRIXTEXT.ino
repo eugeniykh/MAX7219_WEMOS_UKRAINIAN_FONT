@@ -284,7 +284,7 @@ const char* password = "eugene01";  // put your password
 const char* ssid2 = "Galaxy A35";  // put your router name
 const char* password2 = "11111111";  // put your password
 
-char Buf[1000]; char Result[10000];
+char Buf[10000]; char Result[15000];
 int i = 0;
 
 StaticJsonDocument<10000> parsed;
@@ -357,7 +357,7 @@ bool ICACHE_RAM_ATTR httpUpdate() {
       Serial.println();
       // file found at server
       if (httpCode == HTTP_CODE_OK) {
-        http.getString().toCharArray(Result, 10000);
+        http.getString().toCharArray(Result, 15000);
         DeserializationError error = deserializeJson(parsed, Result);
         String news = String(parsed["articles"][0]["title"]) + " " + String(parsed["articles"][0]["description"]);
         news.replace("І", "I");
@@ -373,17 +373,21 @@ bool ICACHE_RAM_ATTR httpUpdate() {
         news.replace("«", "\"");
         news.replace("»", "\"");
 
-        news.toCharArray(Buf, 1000);
+        news.toCharArray(Buf, 10000);
         Serial.printf(Buf);
         Serial.println();
         result = true;
       } else {
-        String(httpCode).toCharArray(Buf, 1000);
+        String(httpCode).toCharArray(Buf, 10000);
         Serial.printf(Buf);
         Serial.println();
       }
     } else {
       Serial.printf("[HTTPS] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      
+      String(http.errorToString(httpCode).c_str()).toCharArray(Buf, 10000);
+      Serial.printf(Buf);
+      Serial.println();
     }
 
     http.end();
@@ -441,14 +445,11 @@ void setup() {
 
   httpUpdate();
   printUpdate();
+  queries.attach(60, onQuery); 
 }
 
 void loop() {
   if (myDisplay.displayAnimate()) {
     myDisplay.displayReset();
-  }
-  if (++i > 3000000) {
-    onQuery();
-    i = 0;
   }
 }
