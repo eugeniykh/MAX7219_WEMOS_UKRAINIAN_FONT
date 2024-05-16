@@ -343,7 +343,7 @@ bool ICACHE_RAM_ATTR httpUpdate() {
     HTTPClient http;
 
     String url = "https://newsapi.org/v2/top-headlines?country=ua&apiKey=07c0ced1e3184108b0e96136886d5743&pageSize=1&page=";
-    url += String(random(0, 50));
+    url += String(random(0, 30));
     Serial.println(url);
     http.begin(client, url);
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
