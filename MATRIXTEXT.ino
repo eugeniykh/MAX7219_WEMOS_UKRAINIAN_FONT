@@ -284,9 +284,8 @@ const char* password = "eugene01";  // put your password
 const char* ssid2 = "Galaxy A35";  // put your router name
 const char* password2 = "11111111";  // put your password
 
-String line = "";
 char Buf[1000]; char Result[10000];
-int i = 0; int j = 0;
+int i = 0;
 
 StaticJsonDocument<10000> parsed;
 
@@ -344,7 +343,7 @@ bool ICACHE_RAM_ATTR httpUpdate() {
     HTTPClient http;
 
     String url = "https://newsapi.org/v2/top-headlines?country=ua&apiKey=07c0ced1e3184108b0e96136886d5743&pageSize=1&page=";
-    url += String(random(0, 20));
+    url += String(random(0, 50));
     Serial.println(url);
     http.begin(client, url);
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -360,7 +359,7 @@ bool ICACHE_RAM_ATTR httpUpdate() {
       if (httpCode == HTTP_CODE_OK) {
         http.getString().toCharArray(Result, 10000);
         DeserializationError error = deserializeJson(parsed, Result);
-        String news = String(parsed["articles"][0]["title"]);
+        String news = String(parsed["articles"][0]["title"]) + " " + String(parsed["articles"][0]["description"]);
         news.replace("І", "I");
         news.replace("і", "i");
         news.replace("Ї", "I");
@@ -369,12 +368,19 @@ bool ICACHE_RAM_ATTR httpUpdate() {
         news.replace("ї", "{");
         news.replace("є", "~");
         news.replace("—", "-");
+        news.replace("–", "-");
         news.replace("`", "'");
+        news.replace("«", "\"");
+        news.replace("»", "\"");
 
         news.toCharArray(Buf, 1000);
         Serial.printf(Buf);
         Serial.println();
         result = true;
+      } else {
+        String(httpCode).toCharArray(Buf, 1000);
+        Serial.printf(Buf);
+        Serial.println();
       }
     } else {
       Serial.printf("[HTTPS] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
@@ -414,8 +420,8 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
-    j++;
-    if (j == 15) {
+    i++;
+    if (i == 15) {
 
       Serial.println();
       Serial.println();
@@ -441,7 +447,7 @@ void loop() {
   if (myDisplay.displayAnimate()) {
     myDisplay.displayReset();
   }
-  if (++i > 20000000) {
+  if (++i > 10000000) {
     onQuery();
     i = 0;
   }
