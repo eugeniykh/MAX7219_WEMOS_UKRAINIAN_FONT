@@ -447,7 +447,7 @@ void loop() {
   if (myDisplay.displayAnimate()) {
     myDisplay.displayReset();
   }
-  if (++i > 5000000) {
+  if (++i > 3000000) {
     onQuery();
     i = 0;
   }
