@@ -366,7 +366,7 @@ bool ICACHE_RAM_ATTR httpUpdate() {
 
         String date = dateTime.substring(5, 10);
 
-        String time = dateTime.substring(11, 16);
+        String time = String(String(dateTime.substring(11, 13)).toInt());
 
         String description = parsed["articles"][0]["description"] ? (" " + String(parsed["articles"][0]["description"])) : "";
 
