@@ -390,6 +390,8 @@ bool ICACHE_RAM_ATTR httpUpdate() {
         news.replace("`", "'");
         news.replace("«", "\"");
         news.replace("»", "\"");
+        news.replace("“", "\"");
+        news.replace("”", "\"");
 
         news.toCharArray(Buf, 2000);
         Serial.printf(Buf);
