@@ -368,7 +368,9 @@ bool ICACHE_RAM_ATTR httpUpdate() {
 
         String time = dateTime.substring(11, 16);
 
-        String news = String(parsed["articles"][0]["title"]) + " "  + time +  " " + date + (parsed["articles"][0]["description"] ? (" " + String(parsed["articles"][0]["description"])) : "");
+        String description = parsed["articles"][0]["description"] ? (" " + String(parsed["articles"][0]["description"])) : "";
+
+        String news = String(parsed["articles"][0]["title"]) + " "  + date +  " " + time + description;
 
         news.replace("І", "I");
         news.replace("і", "i");
