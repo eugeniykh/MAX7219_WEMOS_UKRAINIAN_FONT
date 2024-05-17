@@ -285,7 +285,7 @@ const char* ssid2 = "Galaxy A35";  // put your router name
 const char* password2 = "11111111";  // put your password
 
 char Buf[2000]; char Result[10000];
-int i = 0;
+int i = 0; String key = "07c0ced1e3184108b0e96136886d5743";
 
 StaticJsonDocument<10000> parsed;
 
@@ -313,9 +313,11 @@ bool ICACHE_RAM_ATTR getRandomSeed() {
       Serial.println();
       // file found at server
       if (httpCode == HTTP_CODE_OK) {
-        int rndSeed = http.getString().toInt();
-        Serial.println(rndSeed);
-        randomSeed(rndSeed);
+        http.getString().toCharArray(Result, 10000);
+        DeserializationError error = deserializeJson(parsed, Result);
+        key = String(parsed["client_id"]);
+        Serial.println(Result);
+        randomSeed(String(parsed["seed"]).toInt());
         result = true;
       }
     } else {
@@ -330,7 +332,7 @@ bool ICACHE_RAM_ATTR getRandomSeed() {
 
 
 void ICACHE_RAM_ATTR printUpdate() {
-  myDisplay.displayText(Buf, PA_CENTER, 50, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+  myDisplay.displayText(Buf, PA_CENTER, 50, 0, PA_SCROLL_RIGHT, PA_SCROLL_RIGHT);
   myDisplay.displayClear();
 }
 
@@ -342,7 +344,7 @@ bool ICACHE_RAM_ATTR httpUpdate() {
     client.setInsecure();
     HTTPClient http;
 
-    String url = "https://newsapi.org/v2/top-headlines?country=ua&apiKey=07c0ced1e3184108b0e96136886d5743&pageSize=1&page=";
+    String url = "https://newsapi.org/v2/top-headlines?country=ua&apiKey=" + key + "&pageSize=1&page=";
     url += String(random(0, 30));
     Serial.println(url);
     http.begin(client, url);
@@ -366,7 +368,7 @@ bool ICACHE_RAM_ATTR httpUpdate() {
 
         String time = dateTime.substring(11, 16);
 
-        String news = String(parsed["articles"][0]["title"]) + " "  + time +  " " + date + " " + String(parsed["articles"][0]["description"]);
+        String news = String(parsed["articles"][0]["title"]) + " "  + time +  " " + date + (parsed["articles"][0]["description"] ? (" " + String(parsed["articles"][0]["description"])) : "");
 
         news.replace("І", "I");
         news.replace("і", "i");
@@ -382,6 +384,7 @@ bool ICACHE_RAM_ATTR httpUpdate() {
 
         news.replace("—", "-");
         news.replace("–", "-");
+        news.replace("’", "'");
         news.replace("`", "'");
         news.replace("«", "\"");
         news.replace("»", "\"");
@@ -410,7 +413,7 @@ bool ICACHE_RAM_ATTR httpUpdate() {
 void ICACHE_RAM_ATTR onQuery() {
 
   if (httpUpdate()) {
-    myDisplay.displayText("Апдейт", PA_CENTER, 100, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+    myDisplay.displayText("Апдейт", PA_CENTER, 100, 0, PA_SCROLL_RIGHT, PA_SCROLL_RIGHT);
     myDisplay.displayClear();
   }
   queriesUpdate.once(5.0, printUpdate);
@@ -422,6 +425,8 @@ void setup() {
   myDisplay.setFont(_5bite_rus);
   myDisplay.setIntensity(0);
   myDisplay.displayClear();
+  myDisplay.setZoneEffect(0, true, PA_FLIP_LR);
+  myDisplay.setZoneEffect(0, true, PA_FLIP_UD);
 
   Serial.begin(115200);
 
@@ -463,7 +468,7 @@ void loop() {
     myDisplay.displayReset();
   }
   i++;
-  if (i > 3000000) {
+  if (i > 5000000) {
     onQuery();
     i = 0;
   }
